@@ -31,7 +31,7 @@ namespace TheBlogProject.Models
         [Display(Name = "Blog Image")]
         public byte[] ImageData { get; set; }
         
-        [Display(Name = "Blog Image")]
+        [Display(Name = "Image Type")]
         public string ContentType { get; set; }
         
         [NotMapped]
@@ -39,7 +39,7 @@ namespace TheBlogProject.Models
 
 
         // Navigation Properties
-        public virtual IdentityUser Author { get; set; }
+        public virtual BlogUser Author { get; set; }
         public virtual ICollection<Post> Posts { get; set; } = new HashSet<Post>();
 
 
