@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +8,7 @@ namespace TheBlogProject.Models
 {
     public class BlogUser : IdentityUser
     {
+
         [Required]
         [StringLength(50, ErrorMessage = "The {0} must be at least {2} and no more than {1} characters long.", MinimumLength = 2)]
         [Display(Name = "First Name")]
@@ -37,7 +37,6 @@ namespace TheBlogProject.Models
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and no more than {1} characters long.", MinimumLength = 2)]
         public string GithubUrl { get; set; }
 
-
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 
@@ -45,7 +44,6 @@ namespace TheBlogProject.Models
         // Navigation Properties
         public virtual ICollection<Blog> Blogs { get; set; } = new HashSet<Blog>();
         public virtual ICollection<Post> Posts { get; set; } = new HashSet<Post>();
-        public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
 
     }
 }
