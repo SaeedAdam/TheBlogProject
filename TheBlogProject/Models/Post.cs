@@ -51,7 +51,10 @@ namespace TheBlogProject.Models
 
 
         // Navigation Properties
+
+        [Display(Name = "Blog Name")]
         public virtual Blog Blog { get; set; }
+        [Display(Name = "Blog Author")]
         public virtual BlogUser BlogUser { get; set; }
 
 

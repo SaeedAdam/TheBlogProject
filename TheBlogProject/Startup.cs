@@ -38,6 +38,8 @@ namespace TheBlogProject
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentity<BlogUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddDefaultUI()
+                .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddRazorPages();
