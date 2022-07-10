@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using TheBlogProject.Data;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
+using TheBlogProject.ViewModels;
 
 namespace TheBlogProject
 {
@@ -43,6 +44,9 @@ namespace TheBlogProject
             //Register my custom DataService class
             services.AddScoped<DataService>();
 
+            //Register a pre configured instance of the MailSettings class
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddScoped<IBlogEmailSender, EmailService>();
 
         }
 
