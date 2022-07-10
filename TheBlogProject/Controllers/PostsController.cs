@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.PostgresTypes;
 using TheBlogProject.Data;
 using TheBlogProject.Models;
 
