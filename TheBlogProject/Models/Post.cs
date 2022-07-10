@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Http;
 using TheBlogProject.Enums;
 
 namespace TheBlogProject.Models
@@ -13,7 +13,7 @@ namespace TheBlogProject.Models
 
         [Display(Name = "Blog Name")]
         public int BlogId { get; set; }
-        
+
         public string BlogUserId { get; set; }
 
         [Required]
@@ -39,7 +39,7 @@ namespace TheBlogProject.Models
 
         public string Slug { get; set; }
 
-        
+
         [Display(Name = "Post Image")]
         public byte[] ImageData { get; set; }
 

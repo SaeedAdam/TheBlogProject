@@ -10,7 +10,7 @@ namespace TheBlogProject.Models
         public int PostId { get; set; }
         public string BlogUserId { get; set; }
         public string ModeratorId { get; set; }
-        
+
         [Required]
         [StringLength(500, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 2)]
         [Display(Name = "Comment")]
@@ -41,7 +41,7 @@ namespace TheBlogProject.Models
 
 
         //Navigation Properties
-        public  virtual Post Post { get; set; }
+        public virtual Post Post { get; set; }
         public virtual BlogUser BlogUser { get; set; }
         public virtual BlogUser Moderator { get; set; }
     }
