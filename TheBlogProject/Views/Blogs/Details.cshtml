@@ -1,4 +1,7 @@
-﻿@model TheBlogProject.Models.Blog
+﻿@using TheBlogProject.Services
+
+@inject IImageService ImageService
+@model TheBlogProject.Models.Blog
 
 @{
     ViewData["Title"] = "Details";
@@ -38,13 +41,7 @@
             @Html.DisplayNameFor(model => model.ImageData)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ContentType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ContentType)
+            <img class="img-fluid" src="@ImageService.DecodeImageAsync(Model.ImageData, Model.ContentType)"/>
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.BlogUser)
