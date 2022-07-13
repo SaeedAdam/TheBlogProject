@@ -35,6 +35,35 @@
                 <textarea asp-for="Content" class="form-control"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
+            
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label class="control-label">Manage Tags</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col">
+                                <input type="text" class="form-control" id="TagEntry"/>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col d-grid gap-2 col-6 mx-auto my-2">
+                                <button onclick="addTag()" name="Add" type="button" class="btn btn-dark btn-sm">ADD</button>
+                            </div>
+                            <div class="col d-grid gap-2 col-6 mx-auto my-2">
+                                <button onclick="deleteTag()" name="Delete" type="button" class="btn btn-dark btn-sm">DELETE</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <select  class="form-select" name="TagValues" id="TagList" multiple></select>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label asp-for="ReadyStatus" class="control-label"></label>
                 <select asp-for="ReadyStatus" asp-items="@Html.GetEnumSelectList<ReadyStatus>()" class="form-control"></select>
@@ -57,12 +86,14 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
     <script>
+        let tagValues = "@ViewData["TagValues"]";
+
         //Default font size but not for placeholder...
         $('#Content').summernote({
             placeholder: "Content"
         });
     </script>
+    
+    <script src="~/js/custom.js"></script>
 }

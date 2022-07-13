@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using TheBlogProject.Data;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
@@ -18,11 +19,13 @@ namespace TheBlogProject.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ISlugService _slugService;
         private readonly IImageService _imageService;
-        public PostsController(ApplicationDbContext context, ISlugService slugService, IImageService imageService)
+        private readonly UserManager<BlogUser> _userManager;
+        public PostsController(ApplicationDbContext context, ISlugService slugService, IImageService imageService, UserManager<BlogUser> userManager)
         {
             _context = context;
             _slugService = slugService;
             _imageService = imageService;
+            _userManager = userManager;
         }
 
         // GET: Posts
@@ -43,6 +46,7 @@ namespace TheBlogProject.Controllers
             var post = await _context.Posts
                 .Include(p => p.Blog)
                 .Include(p => p.BlogUser)
+                .Include(p => p.Tags)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
@@ -66,11 +70,15 @@ namespace TheBlogProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BlogId,Title,Abstract,Content,ReadyStatus,Image")] Post post, List<string> tagValues)
+        public async Task<IActionResult> Create([Bind("BlogId,Title,Abstract,Content,ReadyStatus,Image")] Post post, 
+            List<string> tagValues)
         {
             if (ModelState.IsValid)
             {
                 post.Created = DateTime.Now;
+
+                var authorId = _userManager.GetUserId(User);
+                post.BlogUserId = authorId;
 
                 //Use the _imageService to store the incoming user specified image
                 post.ImageData = await _imageService.EncodeImageAsync(post.Image);
@@ -92,6 +100,20 @@ namespace TheBlogProject.Controllers
                 
                 _context.Add(post);
                 await _context.SaveChangesAsync();
+
+                foreach (var tagText in tagValues)
+                {
+                    _context.Add(new Tag()
+                    {
+                        PostId = post.Id,
+                        BlogUserId = authorId,
+                        Text = tagText
+
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -109,22 +131,25 @@ namespace TheBlogProject.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts.Include(p => p.Tags).FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
             }
             ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Name", post.BlogId);
+            ViewData["TagValues"] = string.Join(",", post.Tags.Select(t => t.Text));
 
             return View(post);
         }
 
         // POST: Posts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // To protect from over-posting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BlogId,Title,Abstract,Content,ReadyStatus")] Post post, IFormFile newImage)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BlogId,Title,Abstract,Content,ReadyStatus")] Post post,
+            IFormFile newImage, 
+            List<string> tagValues)
         {
             if (id != post.Id)
             {
@@ -135,7 +160,9 @@ namespace TheBlogProject.Controllers
             {
                 try
                 {
-                    var newPost = await _context.Posts.FindAsync(post.Id);
+                    var newPost = await _context.Posts
+                        .Include(t => t.Tags)
+                        .FirstOrDefaultAsync(p => p.Id == post.Id);
 
                     newPost.Updated = DateTime.Now;
                     newPost.Title = post.Title;
@@ -147,6 +174,21 @@ namespace TheBlogProject.Controllers
                     {
                         newPost.ImageData = await _imageService.EncodeImageAsync(newImage);
                         newPost.ContentType = _imageService.GetContentType(newImage);
+                    }
+
+                    //Remove all tags previously associated with this post
+                    _context.Tags.RemoveRange(newPost.Tags);
+
+                    //Add in the tags from the edit form
+                    foreach (var tagText in tagValues)
+                    {
+                        _context.Add(new Tag()
+                        {
+                            PostId = post.Id,
+                            BlogUserId = post.BlogUserId,
+                            Text = tagText
+
+                        });
                     }
 
                     await _context.SaveChangesAsync();
