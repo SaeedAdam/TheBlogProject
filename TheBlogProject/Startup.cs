@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -80,6 +81,17 @@ namespace TheBlogProject
 
             app.UseEndpoints(endpoints =>
             {
+                
+                endpoints.MapControllerRoute(
+                    name: "SlugRoute",
+                    pattern: "blog/posts/url/{slug}",
+                    defaults: new
+                    {
+                        controller = "Posts",
+                        action = "Details"
+                    });
+                
+                
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
