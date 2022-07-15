@@ -21,6 +21,10 @@
                 <div>
                     <p class="container">@Html.Raw(Model.Content)</p>
                 </div>
+                <div>
+                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.Id">Edit This Post</a>
+                    <a class="btn btn-info" asp-action="Index">Back To List</a>
+                </div>
             </div>
         </div>
     </div>

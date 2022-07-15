@@ -178,7 +178,7 @@ namespace TheBlogProject.Controllers
                         .Include(t => t.Tags)
                         .FirstOrDefaultAsync(p => p.Id == post.Id);
 
-                    originalPost.Updated = DateTime.Now;
+                    originalPost.Updated = DateTime.Now.ToUniversalTime();
                     originalPost.Title = post.Title;
                     originalPost.Abstract = post.Abstract;
                     originalPost.Content = post.Content;
