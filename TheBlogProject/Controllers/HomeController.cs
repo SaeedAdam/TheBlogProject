@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TheBlogProject.Data;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
 using TheBlogProject.ViewModels;
@@ -12,22 +15,29 @@ namespace TheBlogProject.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IBlogEmailSender _emailSender;
-
-        public HomeController(ILogger<HomeController> logger, IBlogEmailSender emailSender)
+        private readonly ApplicationDbContext _dbContext;
+        public HomeController(ILogger<HomeController> logger, IBlogEmailSender emailSender, ApplicationDbContext dbContext)
         {
             _logger = logger;
             _emailSender = emailSender;
+            _dbContext = dbContext;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var blogs = await _dbContext.Blogs
+                .Include(b => b.BlogUser)
+                .ToListAsync();
+
+            return View(blogs);
         }
 
         public IActionResult About()
         {
             return View();
         }
+
+
 
         public IActionResult Contact()
         {
