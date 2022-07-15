@@ -31,7 +31,9 @@ namespace TheBlogProject.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _dbContext.Posts.Include(p => p.Blog).Include(p => p.BlogUser);
+            var applicationDbContext = _dbContext.Posts
+                .Include(p => p.Blog)
+                .Include(p => p.BlogUser);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -43,7 +45,9 @@ namespace TheBlogProject.Controllers
                 return NotFound();
             }
 
-            var posts = _dbContext.Posts.Where(p => p.BlogId == id).ToList();
+            var posts = await _dbContext.Posts
+                .Include(p => p.BlogUser)
+                .Where(p => p.BlogId == id).ToListAsync();
 
             return View("Index", posts);
         }
