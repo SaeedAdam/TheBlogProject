@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TheBlogProject.Data;
+using TheBlogProject.Enums;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
 using TheBlogProject.ViewModels;
+using X.PagedList;
 
 namespace TheBlogProject.Controllers
 {
@@ -23,13 +25,17 @@ namespace TheBlogProject.Controllers
             _dbContext = dbContext;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            var blogs = await _dbContext.Blogs
-                .Include(b => b.BlogUser)
-                .ToListAsync();
+            var pageNumber = page ?? 1;
+            var pageSize = 5;
 
-            return View(blogs);
+            var blogs = _dbContext.Blogs
+                .Include(b => b.BlogUser)
+                .OrderByDescending(p => p.Created)
+                .ToPagedListAsync(pageNumber, pageSize);
+
+            return View(await blogs);
         }
 
         public IActionResult About()

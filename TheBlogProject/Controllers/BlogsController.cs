@@ -68,7 +68,7 @@ namespace TheBlogProject.Controllers
         {
             if (ModelState.IsValid)
             {
-                blog.Created = DateTime.Now;
+                blog.Created = DateTime.Now.ToUniversalTime();
                 blog.BlogUserId = _userManager.GetUserId(User);
                 blog.ImageData = await _imageService.EncodeImageAsync(blog.Image);
                 blog.ContentType = _imageService.GetContentType(blog.Image);
@@ -104,7 +104,7 @@ namespace TheBlogProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Blog blog, IFormFile newImage)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Created")] Blog blog, IFormFile newImage)
         {
             if (id != blog.Id)
             {
@@ -116,8 +116,8 @@ namespace TheBlogProject.Controllers
                 try
                 {
                     var newBlog = await _context.Blogs.FindAsync(blog.Id);
-                    
-                    newBlog.Updated = DateTime.Now;
+                    newBlog.Created = newBlog.Created.ToUniversalTime();
+                    newBlog.Updated = DateTime.Now.ToUniversalTime();
 
                     if (newBlog.Name != blog.Name)
                     {
