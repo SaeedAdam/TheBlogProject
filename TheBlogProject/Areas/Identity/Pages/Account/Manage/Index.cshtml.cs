@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using TheBlogProject.Data;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
 
@@ -21,7 +19,7 @@ namespace TheBlogProject.Areas.Identity.Pages.Account.Manage
 
         public IndexModel(
             UserManager<BlogUser> userManager,
-            SignInManager<BlogUser> signInManager, 
+            SignInManager<BlogUser> signInManager,
             IImageService imageService,
             IConfiguration config)
         {
@@ -54,7 +52,7 @@ namespace TheBlogProject.Areas.Identity.Pages.Account.Manage
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            var currentImage = _imageService.DecodeImageAsync(user.ImageData, user.ContentType);
+            var currentImage = _imageService.DecodeImage(user.ImageData, user.ContentType);
 
             Username = userName;
             CurrentImage = currentImage;

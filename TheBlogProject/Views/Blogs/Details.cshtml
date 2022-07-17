@@ -41,7 +41,7 @@
             @Html.DisplayNameFor(model => model.ImageData)
         </dt>
         <dd class = "col-sm-10">
-            <img class="img-fluid" src="@ImageService.DecodeImageAsync(Model.ImageData, Model.ContentType)"/>
+            <img class="img-fluid" src="@ImageService.DecodeImage(Model.ImageData, Model.ContentType)"/>
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.BlogUser)

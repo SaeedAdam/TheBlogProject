@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Threading.Tasks;
 using TheBlogProject.ViewModels;
 
 namespace TheBlogProject.Services
@@ -38,7 +38,7 @@ namespace TheBlogProject.Services
 
             await smtp.DisconnectAsync(true);
         }
-        
+
 
         //This is the content of the SendContactEmailAsync() method
         //The functional portion of this method is the same as SendEmailAsync(), but the body is pre-set

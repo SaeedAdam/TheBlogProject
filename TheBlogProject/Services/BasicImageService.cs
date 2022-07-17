@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace TheBlogProject.Services
 {
@@ -23,7 +23,7 @@ namespace TheBlogProject.Services
             return await File.ReadAllBytesAsync(file);
         }
 
-        public string DecodeImageAsync(byte[] data, string type)
+        public string DecodeImage(byte[] data, string type)
         {
             if (data is null || type is null) return null;
 

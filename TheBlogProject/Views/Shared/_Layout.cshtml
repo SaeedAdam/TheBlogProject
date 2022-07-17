@@ -40,6 +40,10 @@
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" asp-controller="Posts" asp-action="Index">Posts</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" asp-controller="Home" asp-action="About">About</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" asp-controller="Blogs" asp-action="Create">Create Blog</a></li>
+                        }
                     </ul>
                     <partial name="_LoginPartial"/>
                 </div>
@@ -52,7 +56,16 @@
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <div class="site-heading">
                             <h1>Clean Blog</h1>
-                            <span class="subheading">A Blog Theme by Start Bootstrap</span>
+                            <span class="subheading">A Blog by <a href="https://linkedin.com/in/saeedadam" target="_blank">Saeed Adam</a></span>
+                            
+                            <form asp-action="SearchIndex" asp-controller="Posts">
+                                <div class="input-group mt-5">
+                                    <input type="text" name="SearchTerm" class="form-control" placeholder="Search Term">
+                                    <div class="input-group-append">
+                                        <button class="rounded-3 btn btn-warning btn-block btn-sm" type="submit">Search</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

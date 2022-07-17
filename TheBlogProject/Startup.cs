@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -55,6 +54,9 @@ namespace TheBlogProject
             //Register the Slug Service
             services.AddScoped<ISlugService, BasicSlugService>();
 
+            //Register the Blog Search Service
+            services.AddScoped<BlogSearchService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,7 +83,7 @@ namespace TheBlogProject
 
             app.UseEndpoints(endpoints =>
             {
-                
+
                 endpoints.MapControllerRoute(
                     name: "SlugRoute",
                     pattern: "blog/posts/url/{slug}",
@@ -90,8 +92,8 @@ namespace TheBlogProject
                         controller = "Posts",
                         action = "Details"
                     });
-                
-                
+
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

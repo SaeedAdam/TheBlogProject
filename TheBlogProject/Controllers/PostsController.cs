@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using TheBlogProject.Data;
 using TheBlogProject.Enums;
 using TheBlogProject.Models;
@@ -18,22 +18,39 @@ namespace TheBlogProject.Controllers
 {
     public class PostsController : Controller
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
         private readonly ISlugService _slugService;
         private readonly IImageService _imageService;
         private readonly UserManager<BlogUser> _userManager;
-        public PostsController(ApplicationDbContext context, ISlugService slugService, IImageService imageService, UserManager<BlogUser> userManager)
+        private readonly BlogSearchService _blogSearchService;
+        public PostsController(ApplicationDbContext context, ISlugService slugService, IImageService imageService, UserManager<BlogUser> userManager, BlogSearchService blogSearchService)
         {
-            _dbContext = context;
+            _context = context;
             _slugService = slugService;
             _imageService = imageService;
             _userManager = userManager;
+            _blogSearchService = blogSearchService;
         }
+
+
+        public async Task<IActionResult> SearchIndex(int? page, string searchTerm)
+        {
+            ViewData["searchTerm"] = searchTerm;
+
+            var pageNumber = page ?? 1;
+            var pageSize = 6;
+
+            var posts = _blogSearchService.Search(searchTerm);
+
+
+            return View(await posts.ToPagedListAsync(pageNumber, pageSize));
+        }
+
 
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _dbContext.Posts
+            var applicationDbContext = _context.Posts
                 .Include(p => p.Blog)
                 .Include(p => p.BlogUser);
             return View(await applicationDbContext.ToListAsync());
@@ -43,9 +60,9 @@ namespace TheBlogProject.Controllers
         public async Task<IActionResult> BlogPostsIndex(int? id, int? page)
         {
             var pageNumber = page ?? 1;
-            var pageSize = 5;
+            var pageSize = 6;
 
-            var posts = _dbContext.Posts
+            var posts = _context.Posts
                 .Include(b => b.BlogUser)
                 .Where(p => p.BlogId == id && p.ReadyStatus == ReadyStatus.ProductionReady)
                 .OrderByDescending(p => p.Created)
@@ -63,10 +80,12 @@ namespace TheBlogProject.Controllers
                 return NotFound();
             }
 
-            var post = await _dbContext.Posts
+            var post = await _context.Posts
                 .Include(p => p.Blog)
                 .Include(p => p.BlogUser)
                 .Include(p => p.Tags)
+                .Include(p => p.Comments)
+                .ThenInclude(c => c.BlogUser)
                 .FirstOrDefaultAsync(m => m.Slug == slug);
             if (post == null)
             {
@@ -80,7 +99,7 @@ namespace TheBlogProject.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            ViewData["BlogId"] = new SelectList(_dbContext.Blogs, "Id", "Name");
+            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Name");
             return View();
         }
 
@@ -89,7 +108,7 @@ namespace TheBlogProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BlogId,Title,Abstract,Content,ReadyStatus,Image")] Post post, 
+        public async Task<IActionResult> Create([Bind("BlogId,Title,Abstract,Content,ReadyStatus,Image")] Post post,
             List<string> tagValues)
         {
             if (ModelState.IsValid)
@@ -121,7 +140,7 @@ namespace TheBlogProject.Controllers
                     //Detect incoming duplicate slugs
                     validationError = true;
                     ModelState.AddModelError("Title", "The title you provided cannot be used as it results in a duplicate slug.");
-                    
+
                 }
 
                 if (validationError)
@@ -132,12 +151,12 @@ namespace TheBlogProject.Controllers
 
                 post.Slug = slug;
 
-                _dbContext.Add(post);
-                await _dbContext.SaveChangesAsync();
+                _context.Add(post);
+                await _context.SaveChangesAsync();
 
                 foreach (var tagText in tagValues)
                 {
-                    _dbContext.Add(new Tag()
+                    _context.Add(new Tag()
                     {
                         PostId = post.Id,
                         BlogUserId = authorId,
@@ -146,12 +165,12 @@ namespace TheBlogProject.Controllers
                     });
                 }
 
-                await _dbContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["BlogId"] = new SelectList(_dbContext.Blogs, "Id", "Description", post.BlogId);
+            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Description", post.BlogId);
 
             return View(post);
         }
@@ -165,12 +184,12 @@ namespace TheBlogProject.Controllers
                 return NotFound();
             }
 
-            var post = await _dbContext.Posts.Include(p => p.Tags).FirstOrDefaultAsync(p => p.Id == id);
+            var post = await _context.Posts.Include(p => p.Tags).FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
             }
-            ViewData["BlogId"] = new SelectList(_dbContext.Blogs, "Id", "Name", post.BlogId);
+            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Name", post.BlogId);
             ViewData["TagValues"] = string.Join(",", post.Tags.Select(t => t.Text));
 
             return View(post);
@@ -182,7 +201,7 @@ namespace TheBlogProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,BlogId,Title,Abstract,Content,ReadyStatus")] Post post,
-            IFormFile newImage, 
+            IFormFile newImage,
             List<string> tagValues)
         {
             if (id != post.Id)
@@ -194,7 +213,7 @@ namespace TheBlogProject.Controllers
             {
                 try
                 {
-                    var originalPost = await _dbContext.Posts
+                    var originalPost = await _context.Posts
                         .Include(t => t.Tags)
                         .FirstOrDefaultAsync(p => p.Id == post.Id);
 
@@ -214,9 +233,9 @@ namespace TheBlogProject.Controllers
                             originalPost.Slug = newSlug;
                         }
                         else
-                        { 
+                        {
                             ModelState.AddModelError("Title", "The title you provided cannot be used as it results in a duplicate slug.");
-                            ViewData["BlogId"] = new SelectList(_dbContext.Blogs, "Id", "Name", originalPost.BlogId);
+                            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Name", originalPost.BlogId);
                             ViewData["TagValues"] = string.Join(",", post.Tags.Select(t => t.Text));
                             return View(post);
                         }
@@ -229,12 +248,12 @@ namespace TheBlogProject.Controllers
                     }
 
                     //Remove all tags previously associated with this post
-                    _dbContext.Tags.RemoveRange(originalPost.Tags);
+                    _context.Tags.RemoveRange(originalPost.Tags);
 
                     //Add in the tags from the edit form
                     foreach (var tagText in tagValues)
                     {
-                        _dbContext.Add(new Tag()
+                        _context.Add(new Tag()
                         {
                             PostId = post.Id,
                             BlogUserId = post.BlogUserId,
@@ -243,7 +262,7 @@ namespace TheBlogProject.Controllers
                         });
                     }
 
-                    await _dbContext.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -258,8 +277,8 @@ namespace TheBlogProject.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BlogId"] = new SelectList(_dbContext.Blogs, "Id", "Description", post.BlogId);
-            ViewData["BlogUserId"] = new SelectList(_dbContext.Users, "Id", "Id", post.BlogUser.FullName);
+            ViewData["BlogId"] = new SelectList(_context.Blogs, "Id", "Description", post.BlogId);
+            ViewData["BlogUserId"] = new SelectList(_context.Users, "Id", "Id", post.BlogUser.FullName);
             return View(post);
         }
 
@@ -272,7 +291,7 @@ namespace TheBlogProject.Controllers
                 return NotFound();
             }
 
-            var post = await _dbContext.Posts
+            var post = await _context.Posts
                 .Include(p => p.Blog)
                 .Include(p => p.BlogUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -289,15 +308,15 @@ namespace TheBlogProject.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var post = await _dbContext.Posts.FindAsync(id);
-            _dbContext.Posts.Remove(post);
-            await _dbContext.SaveChangesAsync();
+            var post = await _context.Posts.FindAsync(id);
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PostExists(int id)
         {
-            return _dbContext.Posts.Any(e => e.Id == id);
+            return _context.Posts.Any(e => e.Id == id);
         }
     }
 }

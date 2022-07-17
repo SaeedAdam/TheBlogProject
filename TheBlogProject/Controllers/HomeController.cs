@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TheBlogProject.Data;
-using TheBlogProject.Enums;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
 using TheBlogProject.ViewModels;
@@ -17,20 +16,20 @@ namespace TheBlogProject.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IBlogEmailSender _emailSender;
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
         public HomeController(ILogger<HomeController> logger, IBlogEmailSender emailSender, ApplicationDbContext dbContext)
         {
             _logger = logger;
             _emailSender = emailSender;
-            _dbContext = dbContext;
+            _context = dbContext;
         }
 
         public async Task<IActionResult> Index(int? page)
         {
             var pageNumber = page ?? 1;
-            var pageSize = 5;
+            var pageSize = 6;
 
-            var blogs = _dbContext.Blogs
+            var blogs = _context.Blogs
                 .Include(b => b.BlogUser)
                 .OrderByDescending(p => p.Created)
                 .ToPagedListAsync(pageNumber, pageSize);

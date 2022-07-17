@@ -7,11 +7,11 @@ namespace TheBlogProject.Services
     public class BasicSlugService : ISlugService
     {
 
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
 
         public BasicSlugService(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _context = dbContext;
         }
 
         public string UrlFriendly(string title)
@@ -74,7 +74,7 @@ namespace TheBlogProject.Services
 
         public bool IsUnique(string slug)
         {
-            return !_dbContext.Posts.Any(p => p.Slug == slug);
+            return !_context.Posts.Any(p => p.Slug == slug);
         }
 
         private string RemapInternationalCharToAscii(char c)

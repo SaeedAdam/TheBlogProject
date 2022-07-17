@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,8 +14,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using TheBlogProject.Models;
 using TheBlogProject.Services;
 
@@ -34,7 +33,7 @@ namespace TheBlogProject.Areas.Identity.Pages.Account
             UserManager<BlogUser> userManager,
             SignInManager<BlogUser> signInManager,
             ILogger<RegisterModel> logger,
-            IBlogEmailSender emailSender, 
+            IBlogEmailSender emailSender,
             IImageService imageService, IConfiguration config)
         {
             _userManager = userManager;
@@ -103,12 +102,12 @@ namespace TheBlogProject.Areas.Identity.Pages.Account
             {
                 var user = new BlogUser
                 {
-                    FirstName = Input.FirstName, 
-                    LastName = Input.LastName, 
-                    DisplayName = Input.DisplayName, 
-                    UserName = Input.Email, 
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    DisplayName = Input.DisplayName,
+                    UserName = Input.Email,
                     Email = Input.Email,
-                    ImageData = await _imageService.EncodeImageAsync(Input.ImageFile) ?? 
+                    ImageData = await _imageService.EncodeImageAsync(Input.ImageFile) ??
                                 await _imageService.EncodeImageAsync(_config["DefaultUserImage"]),
                     ContentType = Input.ImageFile is null ?
                         Path.GetExtension(_config["DefaultUserImage"]) :

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TheBlogProject.Data;
 using TheBlogProject.Enums;
 using TheBlogProject.Models;
@@ -11,15 +11,15 @@ namespace TheBlogProject.Services
 {
     public class DataService
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<BlogUser> _userManager;
 
-        public DataService(ApplicationDbContext dbContext, 
-            RoleManager<IdentityRole> roleManager, 
+        public DataService(ApplicationDbContext dbContext,
+            RoleManager<IdentityRole> roleManager,
             UserManager<BlogUser> userManager)
         {
-            _dbContext = dbContext;
+            _context = dbContext;
             _roleManager = roleManager;
             _userManager = userManager;
         }
@@ -27,7 +27,7 @@ namespace TheBlogProject.Services
         public async Task ManageDataAsync()
         {
             //Task: Create the DB from the Migrations
-            await _dbContext.Database.MigrateAsync();
+            await _context.Database.MigrateAsync();
 
             //Task 1: Seed a few roles into the system
             await SeedRolesAsync();
@@ -40,7 +40,7 @@ namespace TheBlogProject.Services
         private async Task SeedRolesAsync()
         {
             //If there are already Roles in the system, do nothing.
-            if (_dbContext.Roles.Any())
+            if (_context.Roles.Any())
             {
                 return;
             }
@@ -57,7 +57,7 @@ namespace TheBlogProject.Services
         private async Task SeedUsersAsync()
         {
             //If there are already users in the system, do nothing.
-            if (_dbContext.Users.Any())
+            if (_context.Users.Any())
             {
                 return;
             }

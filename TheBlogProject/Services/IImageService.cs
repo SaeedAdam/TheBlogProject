@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace TheBlogProject.Services
 {
@@ -7,7 +7,7 @@ namespace TheBlogProject.Services
     {
         Task<byte[]> EncodeImageAsync(IFormFile file);
         Task<byte[]> EncodeImageAsync(string fileName);
-        string DecodeImageAsync(byte[] data, string type);
+        string DecodeImage(byte[] data, string type);
         string GetContentType(IFormFile file);
         int GetImageSize(IFormFile file);
     }
