@@ -7,8 +7,8 @@ function addTag() {
     if (searchResult != null) {
          //Trigger sweet alert for whatever condition is contained in the searchResult variable
          Swal.fire({
-             icon: 'error',
-             title: 'Oops...',
+             icon: "error",
+             title: "Oops...",
              text: `${searchResult.toUpperCase()}`,
              timer: 5000
          });
@@ -33,10 +33,10 @@ function deleteTag() {
         return false;
     }
 
-    if (tagList.selectedIndex == -1) {
+    if (tagList.selectedIndex === -1) {
         Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
+            icon: "error",
+            title: "Oops...",
             html: "<span class = 'font-weight-bolder'>CHOOSE A TAG BEFORE DELETING</>",
             timer: 5000
         });
@@ -55,6 +55,7 @@ function deleteTag() {
         }
         index--;
     }
+    return false;
 }
 
 $("form").on("submit",
@@ -63,7 +64,7 @@ $("form").on("submit",
     });
 
 //Look for the tagValues variable to see if it has data
-if (tagValues != "") {
+if (tagValues !== "") {
     let tagArray = tagValues.split(",");
     for (let loop = 0; loop < tagArray.length; loop++) {
         // Load or replace current options
@@ -80,26 +81,18 @@ function ReplaceTag(tag, index) {
 //The Search function wil detect either an empty or a duplicate Tag in a post 
 //and return an error string if an error is detected
 function search(str) {
-    if (str == "") {
+    if (str === "") {
         return "Empty tags are not permitted";
     }
 
-    var tagsEl = document.getElementById("TagList");
+    const tagsEl = document.getElementById("TagList");
+
     if (tagsEl) {
         let options = tagsEl.options;
         for (let index = 0; index < options.length; index++) {
-            if (options[index].value == str)
+            if (options[index].value === str)
                 return `The tag #${str} was detected as a duplicate and not permitted`;
         }
     }
+    return "Empty tags are not permitted";
 }
-
-
-//const swalWithDarkButton = Swal.mixin({
-//    customClass: {
-//        icon: 'error',
-//        confirmButton: 'btn btn-danger btn-sm note-btn-block btn-outline-dark',
-//        footer: '<p>Please, try again</p>'
-//    },
-//    timer: 5000,
-//})
