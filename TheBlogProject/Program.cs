@@ -22,7 +22,6 @@ namespace TheBlogProject
 
             await dataService.ManageDataAsync();
 
-
             await host.RunAsync();
         }
 
