@@ -20,7 +20,7 @@ namespace TheBlogProject
                                   .ServiceProvider
                                   .GetRequiredService<DataService>();
 
-            await dataService.ManageDataAsync();
+            //await dataService.ManageDataAsync();
 
             await host.RunAsync();
         }
